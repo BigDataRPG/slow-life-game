@@ -1,11 +1,11 @@
 [package]
 name = "slow-life-game"
 version = "0.1.0"
-edition = "2021"
+edition = "2024"
 description = "A slow-life RPG game built with the Bevy engine, focusing on exploration, NPC interaction, and level-up mechanics."
 license = "MIT"
 repository = "https://github.com/BigDataRPG/slow-life-game"
-authors = ["Your Name <youremail@example.com>"]
+authors = ["Sorratat Boyd <sorratat.sirirattanajakarin@example.com>"]
 keywords = ["RPG", "Bevy", "Rust", "Game Development", "Slow Life"]
 homepage = "https://github.com/BigDataRPG/slow-life-game"
 readme = "README.md"
