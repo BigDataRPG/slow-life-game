@@ -1,0 +1,25 @@
+# Ignore Cargo's artifacts
+target/
+
+# Ignore lock file (optional, depending on team preferences)
+Cargo.lock
+
+# Ignore backup files and IDE-specific files
+*.swp
+*.swo
+*.bak
+*.tmp
+*.old
+
+# Ignore macOS system files
+.DS_Store
+
+# Ignore raw assets that shouldn't be in the repo (e.g., large files, unprocessed assets)
+raw_assets/
+
+# Ignore logs and temporary files
+logs/
+*.log
+
+# Ignore the compiled assets folder
+assets/*.psd
