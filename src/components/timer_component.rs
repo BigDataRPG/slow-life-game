@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 
-#[derive(Component)]
+#[derive(Component, Deref, DerefMut)]
 pub struct AttackTimer(pub Timer);
 
 #[derive(Component, Deref, DerefMut)]

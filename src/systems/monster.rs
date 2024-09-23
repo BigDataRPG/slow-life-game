@@ -5,12 +5,12 @@ use crate::components::{
     animation::{AnimationIndices, AnimationTimer},
     monster::{Monster, MonsterHealthBar, MonsterHealthBarBackground},
     monster_movement::MonsterMovement,
+    monster_respawn_timer::MonsterRespawnTimer,
     stats::{MonsterType, Stats},
     timer_component::MovementTimer,
 };
 use crate::resources::game_assets::GameAssets;
 use crate::utils::common::{calculate_scale_atlas, snap_to_grid};
-use crate::MonsterRespawnTimer;
 
 pub fn monster_respawn_system(
     mut commands: Commands,
@@ -20,9 +20,9 @@ pub fn monster_respawn_system(
     texture_atlases: Res<Assets<TextureAtlas>>,
     query: Query<(), With<Monster>>, // To count existing monsters
 ) {
-    timer.timer.tick(time.delta());
+    timer.tick(time.delta());
 
-    if timer.timer.finished() && query.iter().count() < 20 {
+    if timer.finished() && query.iter().count() < 20 {
         let spawn_area = -250.0..250.0;
         let mut rng = thread_rng();
         let x = rng.gen_range(spawn_area.clone());
@@ -57,9 +57,9 @@ pub fn monster_respawn_system(
 
         // Set speed based on monster type
         let speed = match monster_type {
-            MonsterType::Lesser => 50.0,
-            MonsterType::Elite => 70.0,
-            MonsterType::King => 90.0,
+            MonsterType::Lesser => 5.0,
+            MonsterType::Elite => 15.0,
+            MonsterType::King => 50.0,
             MonsterType::Legend => 110.0,
         };
 

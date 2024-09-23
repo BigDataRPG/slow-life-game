@@ -9,6 +9,7 @@ mod utils;
 
 // Use components
 use components::monster::{MonsterHealthBar, MonsterHealthBarBackground};
+use components::monster_respawn_timer::MonsterRespawnTimer;
 use components::stats::{MonsterType, Stats};
 use components::timer_component::AttackTimer;
 use components::{monster::Monster, npc::NPC, player::Player};
@@ -28,9 +29,6 @@ use systems::monster_movement::monster_movement_system;
 use systems::{
     combat_system::combat_system, interaction::npc_interaction, movement::player_movement,
 };
-
-// Import the respawn system
-use resources::monster_respawn_timer::MonsterRespawnTimer;
 
 // Use resources
 use resources::game_assets::GameAssets;
@@ -188,9 +186,10 @@ fn setup(
         });
 
     // To manage the respawn timing of monsters globally.
-    commands.insert_resource(MonsterRespawnTimer {
-        timer: Timer::from_seconds(1.0, TimerMode::Repeating),
-    });
+    commands.insert_resource(MonsterRespawnTimer(Timer::from_seconds(
+        1.0,
+        TimerMode::Repeating,
+    )));
 
     // Spawn an NPC
     commands

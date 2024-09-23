@@ -96,9 +96,9 @@ impl Stats {
     // Common method to handle gaining experience
     pub fn gain_experience(&mut self, amount: i32) {
         self.experience += amount;
-        let exp_needed = self.level * 100; // Experience needed to level up
-        if self.experience >= exp_needed {
-            self.experience -= exp_needed;
+        // Loop to handle multiple level-ups
+        while self.experience >= self.level * 100 {
+            self.experience -= self.level * 100;
             self.level_up();
         }
     }
