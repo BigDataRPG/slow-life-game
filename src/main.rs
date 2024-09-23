@@ -10,11 +10,12 @@ mod utils;
 
 // Use components
 use crate::components::animation::{AnimationIndices, AnimationTimer};
+use crate::components::monster_type::MonsterType;
 use components::monster::{MonsterHealthBar, MonsterHealthBarBackground};
 use components::monster_movement::MonsterMovement;
 use components::monster_respawn_timer::MonsterRespawnTimer;
 use components::monster_state::MonsterState;
-use components::stats::{MonsterType, Stats};
+use components::stats::Stats;
 use components::timer_component::{AttackTimer, MovementTimer};
 use components::{monster::Monster, npc::NPC, player::Player};
 

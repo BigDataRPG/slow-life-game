@@ -1,5 +1,7 @@
 use bevy::prelude::*;
 
+use crate::components::monster_type::MonsterType;
+
 #[derive(Component)]
 pub struct Stats {
     pub health: i32,
@@ -12,14 +14,6 @@ pub struct Stats {
     pub critical_damage: f32, // Multiplier for critical hits (e.g., 1.5 for 150% damage)
     pub hit_rate: f32,      // Percentage chance to hit the target (e.g., 0.9 for 90%)
     pub free_rate: f32,     // Custom stat, could be used for dodge or some other mechanic
-}
-
-// Enum to define monster types
-pub enum MonsterType {
-    Lesser,
-    Elite,
-    King,
-    Legend,
 }
 
 impl Stats {

@@ -7,7 +7,8 @@ use crate::components::{
     monster_movement::MonsterMovement,
     monster_respawn_timer::MonsterRespawnTimer,
     monster_state::MonsterState,
-    stats::{MonsterType, Stats},
+    monster_type::MonsterType,
+    stats::Stats,
     timer_component::{AttackTimer, MovementTimer},
 };
 use crate::resources::game_assets::GameAssets;
@@ -45,12 +46,7 @@ pub fn monster_respawn_system(
         let animation_indices = AnimationIndices { first: 0, last: 1 };
         let monster_scale = calculate_scale_atlas(&assets.monster_sprite_sheet, &texture_atlases);
 
-        let monster_color = match monster_type {
-            MonsterType::Lesser => Color::GREEN,
-            MonsterType::Elite => Color::YELLOW,
-            MonsterType::King => Color::ORANGE,
-            MonsterType::Legend => Color::PURPLE,
-        };
+        let monster_color = monster_type.color();
 
         // Generate a random movement direction
         let direction =
@@ -83,6 +79,7 @@ pub fn monster_respawn_system(
                 ..Default::default()
             })
             .insert(Monster)
+            .insert(monster_type)
             .insert(Stats::monster_stats(monster_type))
             .insert(MonsterMovement {
                 direction,
@@ -99,7 +96,7 @@ pub fn monster_respawn_system(
                 TimerMode::Repeating,
             )))
             .insert(AttackTimer(Timer::from_seconds(2.0, TimerMode::Repeating)))
-            .insert(MonsterState::Idle)
+            .insert(MonsterState::Aggressive)
             .with_children(|parent| {
                 // Health Bar Background
                 parent
