@@ -6,8 +6,9 @@ use crate::components::{
     monster::{Monster, MonsterHealthBar, MonsterHealthBarBackground},
     monster_movement::MonsterMovement,
     monster_respawn_timer::MonsterRespawnTimer,
+    monster_state::MonsterState,
     stats::{MonsterType, Stats},
-    timer_component::MovementTimer,
+    timer_component::{AttackTimer, MovementTimer},
 };
 use crate::resources::game_assets::GameAssets;
 use crate::utils::common::{calculate_scale_atlas, snap_to_grid};
@@ -55,12 +56,12 @@ pub fn monster_respawn_system(
         let direction =
             Vec3::new(rng.gen_range(-1.0..1.0), rng.gen_range(-1.0..1.0), 0.0).normalize();
 
-        // Set speed based on monster type
-        let speed = match monster_type {
-            MonsterType::Lesser => 5.0,
-            MonsterType::Elite => 15.0,
-            MonsterType::King => 50.0,
-            MonsterType::Legend => 110.0,
+        // Set speeds based on monster type
+        let (idle_speed, aggressive_speed) = match monster_type {
+            MonsterType::Lesser => (5.0, 10.0),
+            MonsterType::Elite => (15.0, 30.0),
+            MonsterType::King => (50.0, 75.0),
+            MonsterType::Legend => (110.0, 150.0),
         };
 
         // Set the timer duration (e.g., change direction every 2 to 5 seconds)
@@ -83,7 +84,11 @@ pub fn monster_respawn_system(
             })
             .insert(Monster)
             .insert(Stats::monster_stats(monster_type))
-            .insert(MonsterMovement { direction, speed })
+            .insert(MonsterMovement {
+                direction,
+                idle_speed,
+                aggressive_speed,
+            })
             .insert(MovementTimer(Timer::from_seconds(
                 timer_duration,
                 TimerMode::Repeating,
@@ -93,7 +98,8 @@ pub fn monster_respawn_system(
                 0.5,
                 TimerMode::Repeating,
             )))
-            .insert(MonsterMovement { direction, speed }) // Add the Movement component
+            .insert(AttackTimer(Timer::from_seconds(2.0, TimerMode::Repeating)))
+            .insert(MonsterState::Idle)
             .with_children(|parent| {
                 // Health Bar Background
                 parent

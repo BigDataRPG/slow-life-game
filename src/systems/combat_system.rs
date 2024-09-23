@@ -1,6 +1,5 @@
 use crate::components::{monster::Monster, player::Player, stats::Stats};
 use crate::systems::combat::attack::player_attack_system;
-use crate::systems::combat::damage::monster_retaliate;
 use bevy::prelude::*;
 
 pub fn combat_system(
@@ -28,12 +27,6 @@ pub fn combat_system(
                     monster_entity,
                     &mut monster_stats,
                 );
-
-                if monster_stats.health > 0 {
-                    // If the monster is still alive, retaliate
-                    let mut rng = rand::thread_rng();
-                    monster_retaliate(&mut rng, &mut player_stats, &mut monster_stats);
-                }
 
                 break; // Only attack one monster at a time
             }

@@ -1,5 +1,6 @@
 use bevy::input::mouse::MouseWheel;
 use bevy::prelude::*;
+use rand::prelude::*;
 
 // Import modules
 mod components;
@@ -8,10 +9,13 @@ mod systems;
 mod utils;
 
 // Use components
+use crate::components::animation::{AnimationIndices, AnimationTimer};
 use components::monster::{MonsterHealthBar, MonsterHealthBarBackground};
+use components::monster_movement::MonsterMovement;
 use components::monster_respawn_timer::MonsterRespawnTimer;
+use components::monster_state::MonsterState;
 use components::stats::{MonsterType, Stats};
-use components::timer_component::AttackTimer;
+use components::timer_component::{AttackTimer, MovementTimer};
 use components::{monster::Monster, npc::NPC, player::Player};
 
 // Use utils
@@ -23,9 +27,11 @@ use crate::systems::ui::{
     update_health_text, update_level_text,
 };
 use systems::animation::animate_sprites;
+use systems::combat::attack::monster_attack_system;
 use systems::loading::check_assets_loaded;
 use systems::monster::monster_respawn_system;
 use systems::monster_movement::monster_movement_system;
+use systems::monster_state_system::monster_state_system;
 use systems::{
     combat_system::combat_system, interaction::npc_interaction, movement::player_movement,
 };
@@ -80,9 +86,11 @@ fn main() {
                 update_health_bar,
                 update_health_text,
                 update_level_text,
+                monster_attack_system,
                 monster_respawn_system,
                 animate_sprites,
                 monster_movement_system,
+                monster_state_system,
             )
                 .run_if(in_state(GameState::Playing)),
         )
@@ -121,6 +129,17 @@ fn setup(
     let npc_scale = calculate_scale(&assets.npc, &images);
     let monster_scale = calculate_scale_atlas(&assets.monster_sprite_sheet, &texture_atlases);
 
+    // Set the timer duration (e.g., change direction every 2 to 5 seconds)
+    let mut rng = thread_rng();
+    let timer_duration = rng.gen_range(2.0..5.0);
+
+    // Generate a random movement direction
+    let direction = Vec3::new(rng.gen_range(-1.0..1.0), rng.gen_range(-1.0..1.0), 0.0).normalize();
+
+    // Set speed based on monster type
+    let idle_speed = 5.0;
+    let aggressive_speed = 10.0;
+
     // Spawn the player
     commands
         .spawn(SpriteBundle {
@@ -148,7 +167,22 @@ fn setup(
         })
         .insert(Monster)
         .insert(Stats::monster_stats(MonsterType::Lesser))
-        .insert(AttackTimer(Timer::from_seconds(1.0, TimerMode::Repeating)))
+        .insert(MonsterMovement {
+            direction,
+            idle_speed,
+            aggressive_speed,
+        })
+        .insert(AnimationIndices { first: 0, last: 1 })
+        .insert(AnimationTimer(Timer::from_seconds(
+            0.5,
+            TimerMode::Repeating,
+        )))
+        .insert(AttackTimer(Timer::from_seconds(2.0, TimerMode::Repeating)))
+        .insert(MovementTimer(Timer::from_seconds(
+            timer_duration,
+            TimerMode::Repeating,
+        )))
+        .insert(MonsterState::Idle)
         .with_children(|parent| {
             // Health Bar Background
             parent
