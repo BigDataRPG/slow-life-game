@@ -1,5 +1,9 @@
+pub mod animation;
 pub mod combat;
+pub mod combat_system;
 pub mod interaction;
+pub mod loading;
 pub mod monster;
+pub mod monster_movement;
 pub mod movement;
 pub mod ui;

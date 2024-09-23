@@ -1,4 +1,9 @@
+pub mod animation;
+pub mod hitbox;
 pub mod monster;
+pub mod monster_movement;
 pub mod npc;
 pub mod player;
 pub mod stats;
+pub mod timer_component;
+pub mod ui;

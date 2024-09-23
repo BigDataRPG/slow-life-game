@@ -1,19 +1,10 @@
+use crate::components::ui::{
+    ExperienceBar, ExperienceText, HealthBar, HealthText, LevelText, PlayerUI,
+};
 use crate::components::{
     monster::Monster, monster::MonsterHealthBar, player::Player, stats::Stats,
 };
 use bevy::prelude::*;
-
-#[derive(Component)]
-pub struct PlayerUI;
-
-#[derive(Component)]
-pub struct HealthBar;
-
-#[derive(Component)]
-pub struct ExperienceBar;
-
-#[derive(Component)]
-pub struct LevelText;
 
 pub fn setup_player_ui(mut commands: Commands, asset_server: Res<AssetServer>) {
     // Load a font
@@ -26,78 +17,165 @@ pub fn setup_player_ui(mut commands: Commands, asset_server: Res<AssetServer>) {
                 style: Style {
                     width: Val::Percent(100.0),
                     height: Val::Percent(100.0),
-                    flex_direction: FlexDirection::Column, // Set to Column
-                    align_items: AlignItems::FlexStart,    // Align items to the start
+                    flex_direction: FlexDirection::Column, // Arrange children vertically
+                    align_items: AlignItems::FlexStart,    // Align items to the start (left)
+                    padding: UiRect::all(Val::Px(10.0)),   // Add some padding around
                     ..Default::default()
                 },
                 ..Default::default()
             },
-            PlayerUI,
+            PlayerUI, // Marker component
         ))
         .with_children(|parent| {
-            // Health Bar Background
+            // =====================
+            // Health Bar Section
+            // =====================
+            // Health Bar Container
             parent
                 .spawn(NodeBundle {
                     style: Style {
+                        position_type: PositionType::Relative,
                         width: Val::Px(200.0),
-                        height: Val::Px(20.0),
+                        height: Val::Px(25.0),
                         margin: UiRect::all(Val::Px(5.0)),
+                        justify_content: JustifyContent::FlexStart,
+                        align_items: AlignItems::Center,
                         ..Default::default()
                     },
-                    background_color: BackgroundColor(Color::DARK_GRAY),
                     ..Default::default()
                 })
                 .with_children(|parent| {
-                    // Health Bar Fill
-                    parent.spawn((
-                        NodeBundle {
+                    // Health Bar Background
+                    parent
+                        .spawn(NodeBundle {
                             style: Style {
                                 width: Val::Percent(100.0),
                                 height: Val::Percent(100.0),
                                 ..Default::default()
                             },
-                            background_color: BackgroundColor(Color::RED),
+                            background_color: BackgroundColor(Color::DARK_GRAY),
+                            ..Default::default()
+                        })
+                        .with_children(|parent| {
+                            // Health Bar Fill
+                            parent.spawn((
+                                NodeBundle {
+                                    style: Style {
+                                        width: Val::Percent(100.0), // Will be updated based on health
+                                        height: Val::Percent(100.0),
+                                        ..Default::default()
+                                    },
+                                    background_color: BackgroundColor(Color::RED),
+                                    ..Default::default()
+                                },
+                                HealthBar, // Marker component
+                            ));
+                        });
+
+                    // Health Text Overlay
+                    parent.spawn((
+                        TextBundle {
+                            text: Text::from_section(
+                                "HP: 100 / 100",
+                                TextStyle {
+                                    font: font.clone(),
+                                    font_size: 14.0,
+                                    color: Color::WHITE,
+                                },
+                            ),
+                            style: Style {
+                                position_type: PositionType::Absolute,
+                                left: Val::Percent(50.0),
+                                top: Val::Percent(50.0),
+                                ..Default::default()
+                            },
+                            transform: Transform::from_translation(Vec3::new(-50.0, -7.0, 0.0)),
                             ..Default::default()
                         },
-                        HealthBar,
+                        HealthText, // Marker component
                     ));
                 });
 
-            // Experience Bar Background
+            // =====================
+            // Experience Bar Section
+            // =====================
+            // Experience Bar Container
             parent
                 .spawn(NodeBundle {
                     style: Style {
+                        position_type: PositionType::Relative,
                         width: Val::Px(200.0),
-                        height: Val::Px(10.0),
+                        height: Val::Px(15.0),
                         margin: UiRect::all(Val::Px(5.0)),
+                        justify_content: JustifyContent::FlexStart,
+                        align_items: AlignItems::Center,
                         ..Default::default()
                     },
-                    background_color: BackgroundColor(Color::DARK_GRAY),
                     ..Default::default()
                 })
                 .with_children(|parent| {
-                    // Experience Bar Fill
-                    parent.spawn((
-                        NodeBundle {
+                    // Experience Bar Background
+                    parent
+                        .spawn(NodeBundle {
                             style: Style {
-                                width: Val::Percent(0.0),
+                                width: Val::Percent(100.0),
                                 height: Val::Percent(100.0),
                                 ..Default::default()
                             },
-                            background_color: BackgroundColor(Color::BLUE),
+                            background_color: BackgroundColor(Color::DARK_GRAY),
+                            ..Default::default()
+                        })
+                        .with_children(|parent| {
+                            // Experience Bar Fill
+                            parent.spawn((
+                                NodeBundle {
+                                    style: Style {
+                                        width: Val::Percent(0.0), // Will be updated based on experience
+                                        height: Val::Percent(100.0),
+                                        ..Default::default()
+                                    },
+                                    background_color: BackgroundColor(Color::BLUE),
+                                    ..Default::default()
+                                },
+                                ExperienceBar, // Marker component
+                            ));
+                        });
+
+                    // Experience Text Overlay
+                    parent.spawn((
+                        TextBundle {
+                            text: Text::from_section(
+                                "EXP: 0 / 100",
+                                TextStyle {
+                                    font: font.clone(),
+                                    font_size: 12.0,
+                                    color: Color::WHITE,
+                                },
+                            ),
+                            style: Style {
+                                position_type: PositionType::Absolute,
+                                left: Val::Percent(50.0),
+                                top: Val::Percent(50.0),
+                                // Adjust the translation to center the text
+                                ..Default::default()
+                            },
+                            // Add `Transform` as a separate component
+                            transform: Transform::from_translation(Vec3::new(-50.0, -7.0, 0.0)),
                             ..Default::default()
                         },
-                        ExperienceBar,
+                        ExperienceText, // Marker component
                     ));
                 });
 
-            // Level Text
+            // =====================
+            // Level Text Section
+            // =====================
             parent.spawn((
                 TextBundle {
                     text: Text::from_section(
                         "Level: 1",
                         TextStyle {
-                            font,
+                            font: font.clone(),
                             font_size: 20.0,
                             color: Color::WHITE,
                         },
@@ -108,39 +186,70 @@ pub fn setup_player_ui(mut commands: Commands, asset_server: Res<AssetServer>) {
                     },
                     ..Default::default()
                 },
-                LevelText,
+                LevelText, // Marker component
             ));
         });
 }
 
-pub fn update_player_ui(
+// Separate systems for updating each UI element
+pub fn update_health_text(
     player_query: Query<&Stats, With<Player>>,
-    mut health_bar_query: Query<&mut Style, (With<HealthBar>, Without<ExperienceBar>)>,
-    mut experience_bar_query: Query<&mut Style, (With<ExperienceBar>, Without<HealthBar>)>,
-    mut level_text_query: Query<&mut Text, With<LevelText>>,
+    mut health_text_query: Query<&mut Text, With<HealthText>>,
 ) {
-    if let Ok(player_stats) = player_query.get_single() {
-        // Update Health Bar
-        if let Ok(mut style) = health_bar_query.get_single_mut() {
-            let health_percentage =
-                (player_stats.health as f32 / player_stats.max_health as f32) * 100.0;
-            style.width = Val::Percent(health_percentage);
-        }
-
-        // Update Experience Bar
-        if let Ok(mut style) = experience_bar_query.get_single_mut() {
-            let exp_needed = player_stats.level * 100;
-            let exp_percentage = (player_stats.experience as f32 / exp_needed as f32) * 100.0;
-            style.width = Val::Percent(exp_percentage);
-        }
-
-        // Update Level Text
-        if let Ok(mut text) = level_text_query.get_single_mut() {
-            text.sections[0].value = format!("Level: {}", player_stats.level);
+    if let Ok(stats) = player_query.get_single() {
+        for mut text in health_text_query.iter_mut() {
+            text.sections[0].value = format!("HP: {} / {}", stats.health, stats.max_health);
         }
     }
 }
 
+pub fn update_experience_text(
+    player_query: Query<&Stats, With<Player>>,
+    mut experience_text_query: Query<&mut Text, With<ExperienceText>>,
+) {
+    if let Ok(stats) = player_query.get_single() {
+        let exp_next_level = stats.exp_next_level();
+        for mut text in experience_text_query.iter_mut() {
+            text.sections[0].value = format!("EXP: {} / {}", stats.experience, exp_next_level);
+        }
+    }
+}
+
+pub fn update_level_text(
+    player_query: Query<&Stats, With<Player>>,
+    mut level_text_query: Query<&mut Text, With<LevelText>>,
+) {
+    if let Ok(stats) = player_query.get_single() {
+        for mut text in level_text_query.iter_mut() {
+            text.sections[0].value = format!("Level: {}", stats.level);
+        }
+    }
+}
+
+pub fn update_health_bar(
+    player_query: Query<&Stats, With<Player>>,
+    mut health_bar_query: Query<&mut Style, With<HealthBar>>,
+) {
+    if let Ok(stats) = player_query.get_single() {
+        let health_percentage = (stats.health as f32 / stats.max_health as f32) * 100.0;
+        for mut style in health_bar_query.iter_mut() {
+            style.width = Val::Percent(health_percentage.clamp(0.0, 100.0));
+        }
+    }
+}
+
+pub fn update_experience_bar(
+    player_query: Query<&Stats, With<Player>>,
+    mut experience_bar_query: Query<&mut Style, With<ExperienceBar>>,
+) {
+    if let Ok(stats) = player_query.get_single() {
+        let exp_next_level = stats.exp_next_level();
+        let exp_percentage = (stats.experience as f32 / exp_next_level as f32) * 100.0;
+        for mut style in experience_bar_query.iter_mut() {
+            style.width = Val::Percent(exp_percentage.clamp(0.0, 100.0));
+        }
+    }
+}
 pub fn update_monster_health_bars(
     monsters: Query<(&Children, &Stats), With<Monster>>,
     mut health_bar_query: Query<&mut Style, With<MonsterHealthBar>>,

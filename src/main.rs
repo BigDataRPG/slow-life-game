@@ -1,4 +1,3 @@
-use bevy::asset::LoadState;
 use bevy::input::mouse::MouseWheel;
 use bevy::prelude::*;
 
@@ -10,13 +9,25 @@ mod utils;
 
 // Use components
 use components::monster::{MonsterHealthBar, MonsterHealthBarBackground};
-use components::{monster::Monster, npc::NPC, player::Player, stats::Stats};
-use utils::{calculate_scale, snap_to_grid};
+use components::stats::{MonsterType, Stats};
+use components::timer_component::AttackTimer;
+use components::{monster::Monster, npc::NPC, player::Player};
+
+// Use utils
+use utils::common::{calculate_scale, calculate_scale_atlas, snap_to_grid};
 
 // Use systems
+use crate::systems::ui::{
+    setup_player_ui, update_experience_bar, update_experience_text, update_health_bar,
+    update_health_text, update_level_text,
+};
+use systems::animation::animate_sprites;
+use systems::loading::check_assets_loaded;
 use systems::monster::monster_respawn_system;
-use systems::ui::{setup_player_ui, update_monster_health_bars, update_player_ui};
-use systems::{combat::combat_system, interaction::npc_interaction, movement::player_movement};
+use systems::monster_movement::monster_movement_system;
+use systems::{
+    combat_system::combat_system, interaction::npc_interaction, movement::player_movement,
+};
 
 // Import the respawn system
 use resources::monster_respawn_timer::MonsterRespawnTimer;
@@ -37,10 +48,18 @@ struct Mask;
 
 fn main() {
     App::new()
-        .add_plugins(DefaultPlugins)
+        // .insert_resource(ClearColor(Color::rgb(0.1, 0.1, 0.1))) // Set a visible background color
+        .add_plugins(DefaultPlugins.set(WindowPlugin {
+            primary_window: Some(Window {
+                title: "Slow Life RPG".to_string(), // Set your window title here
+                resolution: (1280., 720.).into(),
+                ..Default::default()
+            }),
+            ..Default::default()
+        }))
         .add_state::<GameState>()
         // Systems that run once when entering the Loading state
-        .add_systems(OnEnter(GameState::Loading), load_assets)
+        .add_systems(OnEnter(GameState::Loading), load_game_assets)
         // Systems that run every frame while in the Loading state
         .add_systems(
             Update,
@@ -58,47 +77,36 @@ fn main() {
                 camera_follow_player,
                 mask_follow_player,
                 combat_system,
-                update_player_ui,
-                update_monster_health_bars,
+                update_experience_bar,
+                update_experience_text,
+                update_health_bar,
+                update_health_text,
+                update_level_text,
                 monster_respawn_system,
+                animate_sprites,
+                monster_movement_system,
             )
                 .run_if(in_state(GameState::Playing)),
         )
         .run();
 }
 
-// System to load assets during Loading state
-fn load_assets(mut commands: Commands, asset_server: Res<AssetServer>) {
-    let assets = GameAssets {
-        background: asset_server.load("images/background/background_test.png"),
-        player: asset_server.load("images/players/player_test.png"),
-        npc: asset_server.load("images/npc/npc_test.png"),
-        mask: asset_server.load("images/background/mask_test.png"),
-        monster: asset_server.load("images/monsters/monster_test.png"),
-    };
-    commands.insert_resource(assets);
-}
-
-// System to check if assets are loaded and transition to Playing state
-fn check_assets_loaded(
-    asset_server: Res<AssetServer>,
-    assets: Res<GameAssets>,
-    mut next_state: ResMut<NextState<GameState>>,
-) {
-    let background_loaded = asset_server.get_load_state(&assets.background) == LoadState::Loaded;
-    let player_loaded = asset_server.get_load_state(&assets.player) == LoadState::Loaded;
-    let npc_loaded = asset_server.get_load_state(&assets.npc) == LoadState::Loaded;
-    let monster_loaded = asset_server.get_load_state(&assets.monster) == LoadState::Loaded;
-
-    if background_loaded && player_loaded && npc_loaded && monster_loaded {
-        next_state.set(GameState::Playing);
-    }
-}
-
 // System to setup entities once in the Playing state
-fn setup(mut commands: Commands, assets: Res<GameAssets>, images: Res<Assets<Image>>) {
-    // Add a 2D camera
-    commands.spawn(Camera2dBundle::default());
+fn setup(
+    mut commands: Commands,
+    assets: Res<GameAssets>,
+    images: Res<Assets<Image>>,
+    texture_atlases: Res<Assets<TextureAtlas>>,
+) {
+    // println!("Entering setup function.");
+    // Spawn the camera with an initial zoom of 0.4
+    commands.spawn(Camera2dBundle {
+        transform: Transform {
+            scale: Vec3::new(0.6, 0.6, 1.0), // Set zoom to 0.8as
+            ..Default::default()
+        },
+        ..Default::default()
+    });
 
     // Spawn the background
     commands.spawn(SpriteBundle {
@@ -113,7 +121,7 @@ fn setup(mut commands: Commands, assets: Res<GameAssets>, images: Res<Assets<Ima
     // Calculate scales
     let player_scale = calculate_scale(&assets.player, &images);
     let npc_scale = calculate_scale(&assets.npc, &images);
-    let monster_scale = calculate_scale(&assets.monster, &images);
+    let monster_scale = calculate_scale_atlas(&assets.monster_sprite_sheet, &texture_atlases);
 
     // Spawn the player
     commands
@@ -127,12 +135,12 @@ fn setup(mut commands: Commands, assets: Res<GameAssets>, images: Res<Assets<Ima
             ..Default::default()
         })
         .insert(Player)
-        .insert(Stats::new(100, 10, 5)); // Player stats: health, attack, defense
+        .insert(Stats::player_stats(100, 10, 5));
 
     // Spawn a monster
     commands
-        .spawn(SpriteBundle {
-            texture: assets.monster.clone(),
+        .spawn(SpriteSheetBundle {
+            texture_atlas: assets.monster_sprite_sheet.clone(),
             transform: Transform {
                 translation: snap_to_grid(Vec3::new(300.0, 0.0, 0.0)),
                 scale: monster_scale,
@@ -141,7 +149,8 @@ fn setup(mut commands: Commands, assets: Res<GameAssets>, images: Res<Assets<Ima
             ..Default::default()
         })
         .insert(Monster)
-        .insert(Stats::new(50, 8, 3))
+        .insert(Stats::monster_stats(MonsterType::Lesser))
+        .insert(AttackTimer(Timer::from_seconds(1.0, TimerMode::Repeating)))
         .with_children(|parent| {
             // Health Bar Background
             parent
@@ -178,7 +187,7 @@ fn setup(mut commands: Commands, assets: Res<GameAssets>, images: Res<Assets<Ima
                 });
         });
 
-    // Insert the monster respawn timer
+    // To manage the respawn timing of monsters globally.
     commands.insert_resource(MonsterRespawnTimer {
         timer: Timer::from_seconds(1.0, TimerMode::Repeating),
     });
@@ -265,4 +274,16 @@ fn mask_follow_player(
             mask_transform.translation.y = player_transform.translation.y;
         }
     }
+}
+
+/// System to load GameAssets during Startup
+fn load_game_assets(
+    mut commands: Commands,
+    asset_server: Res<AssetServer>,
+    mut texture_atlases: ResMut<Assets<TextureAtlas>>,
+) {
+    // println!("Loading game assets...");
+    let game_assets = GameAssets::new(&asset_server, &mut texture_atlases);
+    commands.insert_resource(game_assets);
+    // println!("Game assets resource inserted.");
 }

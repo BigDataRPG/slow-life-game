@@ -21,7 +21,7 @@ pub fn npc_interaction(
             // Assuming GRID_SIZE is 32.0
             if keyboard_input.just_pressed(KeyCode::Space) {
                 println!("You are Nooooob, get out of my way!");
-                player_stats.gain_experience(50); // Gain experience
+                player_stats.gain_experience(50000); // Gain experience
             }
         }
     }
