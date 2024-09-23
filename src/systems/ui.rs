@@ -1,10 +1,12 @@
+use bevy::color::palettes::css::{BLUE, DARK_GRAY, RED};
+use bevy::prelude::*;
+
 use crate::components::ui::{
     ExperienceBar, ExperienceText, HealthBar, HealthText, LevelText, PlayerUI,
 };
 use crate::components::{
     monster::Monster, monster::MonsterHealthBar, player::Player, stats::Stats,
 };
-use bevy::prelude::*;
 
 pub fn setup_player_ui(mut commands: Commands, asset_server: Res<AssetServer>) {
     // Load a font
@@ -53,7 +55,7 @@ pub fn setup_player_ui(mut commands: Commands, asset_server: Res<AssetServer>) {
                                 height: Val::Percent(100.0),
                                 ..Default::default()
                             },
-                            background_color: BackgroundColor(Color::DARK_GRAY),
+                            background_color: BackgroundColor(Color::Srgba(DARK_GRAY)),
                             ..Default::default()
                         })
                         .with_children(|parent| {
@@ -65,7 +67,7 @@ pub fn setup_player_ui(mut commands: Commands, asset_server: Res<AssetServer>) {
                                         height: Val::Percent(100.0),
                                         ..Default::default()
                                     },
-                                    background_color: BackgroundColor(Color::RED),
+                                    background_color: BackgroundColor(Color::Srgba(RED)),
                                     ..Default::default()
                                 },
                                 HealthBar, // Marker component
@@ -122,7 +124,7 @@ pub fn setup_player_ui(mut commands: Commands, asset_server: Res<AssetServer>) {
                                 height: Val::Percent(100.0),
                                 ..Default::default()
                             },
-                            background_color: BackgroundColor(Color::DARK_GRAY),
+                            background_color: BackgroundColor(Color::Srgba(DARK_GRAY)),
                             ..Default::default()
                         })
                         .with_children(|parent| {
@@ -134,7 +136,7 @@ pub fn setup_player_ui(mut commands: Commands, asset_server: Res<AssetServer>) {
                                         height: Val::Percent(100.0),
                                         ..Default::default()
                                     },
-                                    background_color: BackgroundColor(Color::BLUE),
+                                    background_color: BackgroundColor(Color::Srgba(BLUE)),
                                     ..Default::default()
                                 },
                                 ExperienceBar, // Marker component

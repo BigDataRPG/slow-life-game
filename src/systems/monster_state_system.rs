@@ -1,18 +1,11 @@
 use crate::components::monster_type::MonsterType;
 use crate::components::{monster::Monster, monster_state::MonsterState, player::Player};
 use crate::resources::physic::*;
+use bevy::color::palettes::css::RED;
 use bevy::prelude::*;
 
 pub fn monster_state_system(
-    mut query: Query<
-        (
-            &Transform,
-            &mut MonsterState,
-            &mut TextureAtlasSprite,
-            &MonsterType,
-        ),
-        With<Monster>,
-    >,
+    mut query: Query<(&Transform, &mut MonsterState, &mut Sprite, &MonsterType), With<Monster>>,
     player_query: Query<&Transform, (With<Player>, Without<Monster>)>,
 ) {
     let player_transform = match player_query.get_single() {
@@ -28,7 +21,7 @@ pub fn monster_state_system(
         if *state == MonsterState::Idle && distance <= MONSTER_DETECTION_RANGE {
             // Switch to Aggressive state
             *state = MonsterState::Aggressive;
-            sprite.color = Color::RED;
+            sprite.color = Color::Srgba(RED);
             println!("Monster became aggressive!");
         } else if *state == MonsterState::Aggressive && distance > MONSTER_DETECTION_RANGE {
             // Switch back to Idle state

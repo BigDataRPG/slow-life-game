@@ -1,3 +1,4 @@
+use bevy::color::palettes::css::{DARK_GRAY, GREEN};
 use bevy::prelude::*;
 use rand::prelude::*;
 
@@ -19,7 +20,7 @@ pub fn monster_respawn_system(
     time: Res<Time>,
     mut timer: ResMut<MonsterRespawnTimer>,
     assets: Res<GameAssets>,
-    texture_atlases: Res<Assets<TextureAtlas>>,
+    texture_atlas_layouts: &mut ResMut<Assets<TextureAtlasLayout>>,
     query: Query<(), With<Monster>>, // To count existing monsters
 ) {
     timer.tick(time.delta());
@@ -44,7 +45,8 @@ pub fn monster_respawn_system(
         };
 
         let animation_indices = AnimationIndices { first: 0, last: 1 };
-        let monster_scale = calculate_scale_atlas(&assets.monster_sprite_sheet, &texture_atlases);
+        let monster_scale =
+            calculate_scale_atlas(&assets.monster_sprite_sheet, &texture_atlas_layouts);
 
         let monster_color = monster_type.color();
 
@@ -64,9 +66,9 @@ pub fn monster_respawn_system(
         let timer_duration = rng.gen_range(2.0..5.0);
 
         commands
-            .spawn(SpriteSheetBundle {
-                texture_atlas: assets.monster_sprite_sheet.clone(),
-                sprite: TextureAtlasSprite {
+            .spawn(SpriteBundle {
+                sprite: assets.monster_sprite_sheet.clone(),
+                sprite: TextureAtlasLayout {
                     index: animation_indices.first,
                     color: monster_color,
                     ..Default::default()
@@ -109,7 +111,7 @@ pub fn monster_respawn_system(
                                 bottom: Val::Px(40.0),
                                 ..Default::default()
                             },
-                            background_color: BackgroundColor(Color::DARK_GRAY),
+                            background_color: BackgroundColor(Color::Srgba(DARK_GRAY)),
                             transform: Transform::from_xyz(0.0, 0.0, 1.0),
                             ..Default::default()
                         },
@@ -124,7 +126,7 @@ pub fn monster_respawn_system(
                                     height: Val::Percent(100.0),
                                     ..Default::default()
                                 },
-                                background_color: BackgroundColor(Color::GREEN),
+                                background_color: BackgroundColor(Color::Srgba(GREEN)),
                                 ..Default::default()
                             },
                             MonsterHealthBar,

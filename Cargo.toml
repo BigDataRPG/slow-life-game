@@ -12,7 +12,8 @@ readme = "README.md"
 categories = ["game", "simulation", "rpg"]
 
 [dependencies]
-bevy = "0.11"
+bevy = "^0.14"
+bevy-inspector-egui = "0.26"
 bevy_rapier2d = "0.27.0"
 rand = "0.8.5"
 

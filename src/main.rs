@@ -1,5 +1,7 @@
+use bevy::color::palettes::css::DARK_GRAY;
 use bevy::input::mouse::MouseWheel;
 use bevy::prelude::*;
+use bevy_inspector_egui::quick::WorldInspectorPlugin;
 use rand::prelude::*;
 
 // Import modules
@@ -62,7 +64,8 @@ fn main() {
             }),
             ..Default::default()
         }))
-        .add_state::<GameState>()
+        .init_state::<GameState>()
+        .add_plugins(WorldInspectorPlugin::new())
         // Systems that run once when entering the Loading state
         .add_systems(OnEnter(GameState::Loading), load_game_assets)
         // Systems that run every frame while in the Loading state
@@ -103,7 +106,7 @@ fn setup(
     mut commands: Commands,
     assets: Res<GameAssets>,
     images: Res<Assets<Image>>,
-    texture_atlases: Res<Assets<TextureAtlas>>,
+    texture_atlases_layouts: Res<Assets<TextureAtlasLayout>>,
 ) {
     // println!("Entering setup function.");
     // Spawn the camera with an initial zoom of 0.4
@@ -157,7 +160,7 @@ fn setup(
 
     // Spawn a monster
     commands
-        .spawn(SpriteSheetBundle {
+        .spawn(SpriteBundle {
             texture_atlas: assets.monster_sprite_sheet.clone(),
             transform: Transform {
                 translation: snap_to_grid(Vec3::new(300.0, 0.0, 0.0)),
@@ -197,7 +200,7 @@ fn setup(
                             // Optionally set left or right
                             ..Default::default()
                         },
-                        background_color: BackgroundColor(Color::DARK_GRAY),
+                        background_color: BackgroundColor(Color::Srgba(DARK_GRAY)),
                         transform: Transform::from_xyz(0.0, 0.0, 1.0),
                         ..Default::default()
                     },
@@ -212,7 +215,7 @@ fn setup(
                                 height: Val::Percent(100.0),
                                 ..Default::default()
                             },
-                            background_color: BackgroundColor(Color::GREEN),
+                            background_color: BackgroundColor(Color::Srgba(DARK_GRAY)),
                             ..Default::default()
                         },
                         MonsterHealthBar,
@@ -259,24 +262,24 @@ fn setup(
 
 fn camera_zoom(
     mut query: Query<&mut OrthographicProjection, With<Camera2d>>,
-    keyboard_input: Res<Input<KeyCode>>,
+    keyboard_input: Res<ButtonInput<KeyCode>>,
     mut scroll_evr: EventReader<MouseWheel>,
 ) {
     let zoom_speed = 0.1; // Adjust zoom speed as needed
 
     for mut ortho in query.iter_mut() {
         // Zoom using the scroll wheel
-        for event in scroll_evr.iter() {
+        for event in scroll_evr.read() {
             ortho.scale -= event.y * zoom_speed;
             ortho.scale = ortho.scale.clamp(0.4, 0.6); // Limit the zoom levels
         }
 
         // Zoom using keys (e.g., Z to zoom in, X to zoom out)
-        if keyboard_input.pressed(KeyCode::Z) {
+        if keyboard_input.pressed(KeyCode::KeyZ) {
             ortho.scale -= zoom_speed;
             ortho.scale = ortho.scale.clamp(0.4, 0.6);
         }
-        if keyboard_input.pressed(KeyCode::X) {
+        if keyboard_input.pressed(KeyCode::KeyX) {
             ortho.scale += zoom_speed;
             ortho.scale = ortho.scale.clamp(0.4, 0.6);
         }
@@ -314,7 +317,7 @@ fn mask_follow_player(
 fn load_game_assets(
     mut commands: Commands,
     asset_server: Res<AssetServer>,
-    mut texture_atlases: ResMut<Assets<TextureAtlas>>,
+    mut texture_atlases: ResMut<Assets<TextureAtlasLayout>>,
 ) {
     // println!("Loading game assets...");
     let game_assets = GameAssets::new(&asset_server, &mut texture_atlases);

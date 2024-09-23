@@ -27,7 +27,6 @@ pub fn monster_movement_system(
 
     // Define your game's boundary
     let boundary = 250.0;
-    let mut rng = thread_rng();
 
     for (mut transform, mut monster_movement, mut movement_timer, monster_state) in query.iter_mut()
     {

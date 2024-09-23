@@ -1,16 +1,11 @@
 use bevy::prelude::*;
 
 use crate::components::animation::{AnimationIndices, AnimationTimer};
-use bevy::sprite::TextureAtlasSprite;
 
 /// System to animate sprites by cycling through TextureAtlas frames.
 pub fn animate_sprites(
     time: Res<Time>,
-    mut query: Query<(
-        &mut AnimationTimer,
-        &AnimationIndices,
-        &mut TextureAtlasSprite,
-    )>,
+    mut query: Query<(&mut AnimationTimer, &AnimationIndices, &mut Sprite)>,
 ) {
     for (mut timer, animation_indices, mut sprite) in query.iter_mut() {
         // Tick the timer

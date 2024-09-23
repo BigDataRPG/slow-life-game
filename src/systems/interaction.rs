@@ -3,7 +3,7 @@ use crate::components::{player::Player, stats::Stats};
 use bevy::prelude::*;
 
 pub fn npc_interaction(
-    keyboard_input: Res<Input<KeyCode>>,
+    keyboard_input: Res<ButtonInput<KeyCode>>,
     mut player_query: Query<(&Transform, &mut Stats), With<Player>>,
     npc_query: Query<&Transform, With<NPC>>,
 ) {

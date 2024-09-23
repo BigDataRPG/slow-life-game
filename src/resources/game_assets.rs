@@ -8,15 +8,14 @@ pub struct GameAssets {
     pub mask: Handle<Image>,
 
     // Texture Atlas for the Monster
-    pub monster_sprite_sheet: Handle<TextureAtlas>,
-    pub monster_sprite_sheet_image: Handle<Image>, // Add this line
+    pub monster_sprite_sheet: Handle<TextureAtlasLayout>,
 }
 
 impl GameAssets {
     /// Loads all necessary game assets, including the monster sprite sheet.
     pub fn new(
         asset_server: &Res<AssetServer>,
-        texture_atlases: &mut ResMut<Assets<TextureAtlas>>,
+        texture_atlas_layouts: &mut ResMut<Assets<TextureAtlasLayout>>,
     ) -> Self {
         // Load individual images
         let background = asset_server.load("images/background/background_test.png");
@@ -25,21 +24,11 @@ impl GameAssets {
         let mask = asset_server.load("images/background/mask_test.png");
 
         // Load the monster sprite sheet image
-        let monster_sprite_sheet_image =
-            asset_server.load("images/monsters/monster_sprite_sheet.png");
+        let monster_sprite_sheet = asset_server.load("images/monsters/monster_sprite_sheet.png");
 
-        // Define the frame size (500x500 pixels)
-        let frame_size = Vec2::new(500.0, 500.0);
-
-        // Create the TextureAtlas from the sprite sheet image
-        let monster_sprite_sheet = texture_atlases.add(TextureAtlas::from_grid(
-            monster_sprite_sheet_image.clone(), // Use the image handle here
-            frame_size,
-            2,    // Number of columns
-            1,    // Number of rows
-            None, // No spacing between sprites
-            None, // No padding
-        ));
+        // the sprite sheet has 2 sprites arranged in a row, and they are all 500px x 500px
+        let layout = TextureAtlasLayout::from_grid(UVec2::splat(500), 2, 1, None, None);
+        let texture_atlas_layout = texture_atlas_layouts.add(layout);
 
         GameAssets {
             background,
@@ -47,7 +36,6 @@ impl GameAssets {
             npc,
             mask,
             monster_sprite_sheet,
-            monster_sprite_sheet_image, // Add this line
         }
     }
 }

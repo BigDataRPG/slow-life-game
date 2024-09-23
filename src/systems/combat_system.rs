@@ -3,7 +3,7 @@ use crate::systems::combat::attack::player_attack_system;
 use bevy::prelude::*;
 
 pub fn combat_system(
-    keyboard_input: Res<Input<KeyCode>>,
+    keyboard_input: Res<ButtonInput<KeyCode>>,
     mut player_query: Query<(&Transform, &mut Stats), (With<Player>, Without<Monster>)>,
     mut monster_query: Query<(Entity, &Transform, &mut Stats), (With<Monster>, Without<Player>)>,
     mut commands: Commands,
@@ -13,7 +13,7 @@ pub fn combat_system(
         Err(_) => return,
     };
 
-    if keyboard_input.just_pressed(KeyCode::J) {
+    if keyboard_input.just_pressed(KeyCode::KeyJ) {
         for (monster_entity, monster_transform, mut monster_stats) in monster_query.iter_mut() {
             let distance = player_transform
                 .translation
