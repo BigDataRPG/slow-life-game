@@ -12,11 +12,11 @@ pub fn check_assets_loaded(
 
     // Collect all asset handles into a vector of untyped handles
     let handles: Vec<UntypedHandle> = vec![
-        assets.background.is_weak(),
-        assets.player.is_weak(),
-        assets.npc.is_weak(),
-        assets.mask.is_weak(),
-        assets.monster_sprite_sheet_image.is_weak(), // Use the image handle
+        assets.background.clone().into(),
+        assets.player.clone().into(),
+        assets.npc.clone().into(),
+        assets.mask.clone().into(),
+        assets.monster_sprite_sheet.clone().into(), // Use the image handle
     ];
 
     let mut all_loaded = true;
@@ -25,13 +25,21 @@ pub fn check_assets_loaded(
         let load_state = asset_server.get_load_state(handle.id());
         // println!("Asset {:?} load state: {:?}", handle.id(), load_state);
 
-        if load_state == LoadState::Failed {
-            // println!("Failed to load asset: {:?}", handle.id());
-            all_loaded = false;
-            break;
-        } else if load_state != LoadState::Loaded {
-            all_loaded = false;
-            break;
+        // Handle the case where load_state is an Option<LoadState>
+        match load_state {
+            Some(LoadState::Failed(_)) => {
+                // Asset loading failed
+                all_loaded = false;
+                break;
+            }
+            Some(LoadState::Loaded) => {
+                // Asset successfully loaded, continue checking others
+            }
+            Some(_) | None => {
+                // Still loading or unknown state, treat as not fully loaded
+                all_loaded = false;
+                break;
+            }
         }
     }
 
