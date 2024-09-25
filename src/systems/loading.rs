@@ -11,12 +11,12 @@ pub fn check_assets_loaded(
     // println!("Checking if assets are loaded...");
 
     // Collect all asset handles into a vector of untyped handles
-    let handles: Vec<HandleUntyped> = vec![
-        assets.background.clone_untyped(),
-        assets.player.clone_untyped(),
-        assets.npc.clone_untyped(),
-        assets.mask.clone_untyped(),
-        assets.monster_sprite_sheet_image.clone_untyped(), // Use the image handle
+    let handles: Vec<UntypedHandle> = vec![
+        assets.background.is_weak(),
+        assets.player.is_weak(),
+        assets.npc.is_weak(),
+        assets.mask.is_weak(),
+        assets.monster_sprite_sheet_image.is_weak(), // Use the image handle
     ];
 
     let mut all_loaded = true;
