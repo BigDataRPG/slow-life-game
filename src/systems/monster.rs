@@ -153,7 +153,7 @@ pub fn monster_respawn_system(
     }
 }
 
-fn generate_frames(
+pub fn generate_frames(
     texture_size: Vec2,
     frame_size: Vec2,
     columns: usize,

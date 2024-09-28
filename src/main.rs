@@ -22,7 +22,7 @@ use components::timer_component::{AttackTimer, MovementTimer};
 use components::{monster::Monster, npc::NPC, player::Player};
 
 // Use utils
-use utils::common::{calculate_scale, calculate_scale_atlas, snap_to_grid};
+use utils::common::{calculate_scale, snap_to_grid};
 
 // Use systems
 use crate::systems::ui::{
@@ -32,11 +32,12 @@ use crate::systems::ui::{
 use systems::animation::animate_sprites;
 use systems::combat::attack::monster_attack_system;
 use systems::loading::check_assets_loaded;
-use systems::monster::monster_respawn_system;
+use systems::monster::{generate_frames, monster_respawn_system};
 use systems::monster_movement::monster_movement_system;
 use systems::monster_state_system::monster_state_system;
 use systems::{
-    combat_system::combat_system, interaction::npc_interaction, movement::player_movement,
+    combat_system::combat_system, interaction::npc_interaction,
+    movement::player_movement,
 };
 
 // Use resources
@@ -65,7 +66,7 @@ fn main() {
             ..Default::default()
         }))
         .init_state::<GameState>()
-        .add_plugins(WorldInspectorPlugin::new())
+        // .add_plugins(WorldInspectorPlugin::new())
         // Systems that run once when entering the Loading state
         .add_systems(OnEnter(GameState::Loading), load_game_assets)
         // Systems that run every frame while in the Loading state
@@ -128,17 +129,35 @@ fn setup(
         ..Default::default()
     });
 
+    // Set up monster animation frames
+    let frame_size = Vec2::new(500.0, 500.0); // Based on your sprite sheet frame size
+    let texture_size = {
+        if let Some(image) = images.get(&assets.monster_sprite_sheet) {
+            image.size().as_vec2()
+        } else {
+            Vec2::new(1000.0, 500.0) // Default size, adjust as needed
+        }
+    };
+    let columns = 2; // Number of frames in a row
+    let rows = 1; // Number of rows in the sprite sheet
+
     // Calculate scales
-    let player_scale = calculate_scale(&assets.player, &images);
-    let npc_scale = calculate_scale(&assets.npc, &images);
-    let monster_scale = calculate_scale_atlas(&assets.monster_sprite_sheet, &texture_atlases);
+    let player_scale = calculate_scale(&assets.player, &images, None);
+    let npc_scale = calculate_scale(&assets.npc, &images, None);
+
+    let monster_scale =
+        calculate_scale(&assets.monster_sprite_sheet, &images, Some(frame_size));
 
     // Set the timer duration (e.g., change direction every 2 to 5 seconds)
     let mut rng = thread_rng();
     let timer_duration = rng.gen_range(2.0..5.0);
 
     // Generate a random movement direction
-    let direction = Vec3::new(rng.gen_range(-1.0..1.0), rng.gen_range(-1.0..1.0), 0.0).normalize();
+    let direction =
+        Vec3::new(rng.gen_range(-1.0..1.0), rng.gen_range(-1.0..1.0), 0.0).normalize();
+
+    // Generate frames for animation
+    let frames = generate_frames(texture_size, frame_size, columns, rows);
 
     // Set speed based on monster type
     let idle_speed = 5.0;
@@ -161,7 +180,7 @@ fn setup(
     // Spawn a monster
     commands
         .spawn(SpriteBundle {
-            texture_atlas: assets.monster_sprite_sheet.clone(),
+            texture: assets.monster_sprite_sheet.clone(),
             transform: Transform {
                 translation: snap_to_grid(Vec3::new(300.0, 0.0, 0.0)),
                 scale: monster_scale,
@@ -176,7 +195,10 @@ fn setup(
             idle_speed,
             aggressive_speed,
         })
-        .insert(AnimationIndices { first: 0, last: 1 })
+        .insert(AnimationIndices {
+            frames: frames.clone(),
+            current_frame: 0,
+        })
         .insert(AnimationTimer(Timer::from_seconds(
             0.5,
             TimerMode::Repeating,
@@ -314,13 +336,9 @@ fn mask_follow_player(
 }
 
 /// System to load GameAssets during Startup
-fn load_game_assets(
-    mut commands: Commands,
-    asset_server: Res<AssetServer>,
-    mut texture_atlases: ResMut<Assets<TextureAtlasLayout>>,
-) {
+fn load_game_assets(mut commands: Commands, asset_server: Res<AssetServer>) {
     // println!("Loading game assets...");
-    let game_assets = GameAssets::new(&asset_server, &mut texture_atlases);
+    let game_assets = GameAssets::new(&asset_server);
     commands.insert_resource(game_assets);
     // println!("Game assets resource inserted.");
 }

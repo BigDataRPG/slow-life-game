@@ -6,9 +6,7 @@ pub struct GameAssets {
     pub player: Handle<Image>,
     pub npc: Handle<Image>,
     pub mask: Handle<Image>,
-
-    // Texture Atlas for the Monster
-    pub monster_sprite_sheet: Handle<TextureAtlasLayout>,
+    pub monster_sprite_sheet: Handle<Image>,
 }
 
 impl GameAssets {
@@ -21,7 +19,8 @@ impl GameAssets {
         let mask = asset_server.load("images/background/mask_test.png");
 
         // Load the monster sprite sheet image
-        let monster_sprite_sheet = asset_server.load("images/monsters/monster_sprite_sheet.png");
+        let monster_sprite_sheet =
+            asset_server.load("images/monsters/monster_sprite_sheet.png");
 
         GameAssets {
             background,
