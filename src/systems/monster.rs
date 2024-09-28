@@ -23,9 +23,9 @@ pub fn monster_respawn_system(
     images: Res<Assets<Image>>,
     query: Query<(), With<Monster>>, // To count existing monsters
 ) {
-    timer.0.tick(time.delta());
+    timer.tick(time.delta());
 
-    if timer.0.finished() && query.iter().count() < 20 {
+    if timer.finished() && query.iter().count() < 20 {
         let spawn_area = -250.0..250.0;
         let mut rng = thread_rng();
         let x = rng.gen_range(spawn_area.clone());

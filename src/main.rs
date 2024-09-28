@@ -103,12 +103,7 @@ fn main() {
 }
 
 // System to setup entities once in the Playing state
-fn setup(
-    mut commands: Commands,
-    assets: Res<GameAssets>,
-    images: Res<Assets<Image>>,
-    texture_atlases_layouts: Res<Assets<TextureAtlasLayout>>,
-) {
+fn setup(mut commands: Commands, assets: Res<GameAssets>, images: Res<Assets<Image>>) {
     // println!("Entering setup function.");
     // Spawn the camera with an initial zoom of 0.4
     commands.spawn(Camera2dBundle {
