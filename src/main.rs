@@ -1,7 +1,7 @@
 use bevy::color::palettes::css::DARK_GRAY;
 use bevy::input::mouse::MouseWheel;
 use bevy::prelude::*;
-use bevy_inspector_egui::quick::WorldInspectorPlugin;
+// use bevy_inspector_egui::quick::WorldInspectorPlugin;
 use rand::prelude::*;
 
 // Import modules
@@ -31,6 +31,7 @@ use crate::systems::ui::{
 };
 use systems::animation::animate_sprites;
 use systems::combat::attack::monster_attack_system;
+use systems::game_over::setup_game_over;
 use systems::loading::check_assets_loaded;
 use systems::monster::{generate_frames, monster_respawn_system};
 use systems::monster_movement::monster_movement_system;
@@ -49,6 +50,7 @@ enum GameState {
     #[default]
     Loading,
     Playing,
+    GameOver,
 }
 
 #[derive(Component)]
@@ -99,6 +101,7 @@ fn main() {
             )
                 .run_if(in_state(GameState::Playing)),
         )
+        .add_systems(OnEnter(GameState::GameOver), setup_game_over)
         .run();
 }
 
