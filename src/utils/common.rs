@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 
-pub const GRID_SIZE: f32 = 32.0;
+pub const GRID_SIZE:  = 32.0;
 pub const CHARACTER_SIZE_COEF: f32 = 1.5;
 
 pub fn snap_to_grid(pos: Vec3) -> Vec3 {
@@ -29,11 +29,15 @@ pub fn calculate_scale_atlas(
     }
 }
 
-pub fn calculate_scale(texture_handle: &Handle<Image>, images: &Res<Assets<Image>>) -> Vec3 {
+pub fn calculate_scale(texture_handle: &Handle<Image>, images: &Assets<Image>) -> Vec3 {
     if let Some(texture) = images.get(texture_handle) {
-        let (width, height) = (texture.size().x, texture.size().y);
+        let width = texture.size().x;
+        let height = texture.size().y;
+        // Calculate the desired scale based on your requirements
+        // For example, scale to 64x64 units
         Vec3::new(GRID_SIZE / width, GRID_SIZE / height, 1.0)
     } else {
-        Vec3::ONE // Default scale if texture isn't loaded yet
+        Vec3::ONE
     }
 }
+
